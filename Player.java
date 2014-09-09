@@ -40,6 +40,8 @@ public class Player extends piedpipers.sim.Player {
 	}
 
 	public Point move(Point[] pipers, Point[] rats) {
+		npipers = pipers.length;
+		
 		Point current = pipers[id];
 
 		if (magnet) {

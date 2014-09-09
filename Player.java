@@ -10,19 +10,11 @@ public class Player extends piedpipers.sim.Player {
 	static double pspeed = 0.49;
 	static double mpspeed = 0.09;
 
-	private boolean magnet;
-	private Point magnetLocation;
+	static int magnet = 0;
+	static Point magnetLocation = new Point(dimension/2, dimension/2); //assume there is only one magnet
 
 	public Player() {
 		super();
-		if (this.id == 0) { //assume there are multiple pipers for now
-			magnet = true;
-			magnetLocation = new Point(dimension/2, dimension/2); //assume there is only one magnet
-		}
-		else {
-			magnet = false;
-			magnetLocation = null;
-		}
 	}
 
 	static double distance(Point a, Point b) {
@@ -41,10 +33,10 @@ public class Player extends piedpipers.sim.Player {
 
 	public Point move(Point[] pipers, Point[] rats) {
 		npipers = pipers.length;
-		
+
 		Point current = pipers[id];
 
-		if (magnet) {
+		if (this.id == magnet) {
 			if (!current.equals(magnetLocation)) {
 				this.music = false;
 				double dist = distance(current, magnetLocation);

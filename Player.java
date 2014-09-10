@@ -63,7 +63,7 @@ public class Player extends piedpipers.sim.Player {
 
 	boolean noRatsOutsideRadius(Point[] rats, Point current) {
 		for (int i = 0; i < rats.length; i++) {
-			if (Math.abs(distance(current, rats[i])) > 9) {
+			if (Math.abs(distance(current, rats[i])) > 9  && rats[i].x > gateLocation.x) {
 				return false;
 			}
 		}

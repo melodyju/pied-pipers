@@ -37,7 +37,7 @@ public class Player extends piedpipers.sim.Player {
 
 	boolean closetoWall (Point current) {
 		boolean wall = false;
-		if (Math.abs(current.x-dimension)<pspeed) {
+		if (Math.abs(current.x-dimension)<pspeed ) {
 			wall = true;
 		}
 		if (Math.abs(current.y-dimension)<pspeed) {
@@ -50,7 +50,7 @@ public class Player extends piedpipers.sim.Player {
 	}
 
 	boolean closetoMagnet(Point current) {
-		if (Math.abs(distance(current, magnetLocation)) < 8) {
+		if (Math.abs(distance(current, magnetLocation)) < 5) {
 			return true;
 		}
 		return false;
@@ -58,7 +58,7 @@ public class Player extends piedpipers.sim.Player {
 
 	boolean noRatsOutsideRadius(Point[] rats) {
 		for (int i = 0; i < rats.length; i++) {
-			if (closetoMagnet(rats[i])) {
+			if (!closetoMagnet(rats[i])) {
 				return false;
 			}
 		}
@@ -107,9 +107,11 @@ public class Player extends piedpipers.sim.Player {
 				reachedmagnet = true; 
 				if(this.id == magnet) {
 					this.music = true;
-					if (noRatsOutsideRadius) {
+					if (noRatsOutsideRadius(rats)) {
+						System.out.println("NO RATS OUTSIDE RADIUS");
 						//all rats collected at magnet, magnet back to other side
 						Point target = new Point(0, gateLocation.y);
+						System.out.println("target = " + target.x + " " + target.y);
 						double dist = distance(current, target);
 						double ox = mpspeed * (target.x - current.x) / dist;
 						double oy = mpspeed * (target.y - current.y) / dist ;
@@ -124,21 +126,14 @@ public class Player extends piedpipers.sim.Player {
 				}
 				else
 				{	
+					
 					while (true) {
 						if (!comeback) {
 							if (!closetoWall(current)) {
 								this.music = false;
 								current.x += pspeed * Math.sin(angle[this.id] * Math.PI / 180);
 								current.y += pspeed * Math.cos(angle[this.id] * Math.PI / 180);
-								/*if (angle[this.id] <= 180) {
-									current.x += pspeed * Math.sin(angle[this.id] * Math.PI / 180);
-									current.y += pspeed * Math.cos(angle[this.id] * Math.PI / 180);
-								}
-								else {
-									current.x -= pspeed * Math.sin(angle[this.id] * Math.PI / 180);
-									current.y -= pspeed * Math.cos(angle[this.id] * Math.PI / 180);
-								}
-								*/
+								
 								return current;
 							}
 							else {

@@ -43,6 +43,9 @@ public class Player extends piedpipers.sim.Player {
 		if (Math.abs(current.y-dimension)<pspeed) {
 			wall = true;
 		}
+		if (Math.abs(current.x-dimension/2)<pspeed ) {
+			wall = true;
+		}
 		if (Math.abs(current.y)<pspeed) {
 			wall = true;
 		}
@@ -56,9 +59,9 @@ public class Player extends piedpipers.sim.Player {
 		return false;
 	}
 
-	boolean noRatsOutsideRadius(Point[] rats) {
+	boolean noRatsOutsideRadius(Point[] rats, Point current) {
 		for (int i = 0; i < rats.length; i++) {
-			if (!closetoMagnet(rats[i])) {
+			if (Math.abs(distance(current, rats[i])) > 9) {
 				return false;
 			}
 		}
@@ -79,23 +82,37 @@ public class Player extends piedpipers.sim.Player {
 		
 		gateLocation = new Point(dimension/2, dimension/2); //assume there is only one magnet
 		magnetLocation = new Point(3*dimension/4, dimension/2);
+		
+		
 		Point current = pipers[id];
 		System.out.println("PRINTING MAGNET LOCATION....." + magnetLocation.x +  "," + magnetLocation.y);
-		if(current.x < gateLocation.x && reachedmagnet == false){
+		if(current.x < magnetLocation.x && reachedmagnet == false){
 			this.music = false;
-			double dist = distance(current, gateLocation);
-			double ox = (gateLocation.x - current.x) / dist * pspeed;
-			double oy = (gateLocation.y - current.y) / dist * pspeed;
-			current.x += ox;
-			current.y += oy;
-			return current;
+			
+			if (current.x < gateLocation.x) {
+				double dist = distance(current, gateLocation);
+				double ox = (gateLocation.x - current.x) / dist * pspeed;
+				double oy = (gateLocation.y - current.y) / dist * pspeed;
+				current.x += ox;
+				current.y += oy;
+				return current;
+			}
+			else {
+				double dist = distance(current, magnetLocation);
+				double ox = (magnetLocation.x - current.x) / dist * pspeed;
+				double oy = (magnetLocation.y - current.y) / dist * pspeed;
+				current.x += ox;
+				current.y += oy;
+				return current;
+			}
+			
 		}
 		else
 		{
 			reachedmagnet = true; 
 			if(this.id == magnet) {
 				this.music = true;
-				if (noRatsOutsideRadius(rats)) {
+				if (noRatsOutsideRadius(rats, current)) {
 					System.out.println("NO RATS OUTSIDE RADIUS");
 					//all rats collected at magnet, magnet back to other side
 					Point target = new Point(0, gateLocation.y);

@@ -81,7 +81,7 @@ public class Player extends piedpipers.sim.Player {
 		magnetLocation = new Point(3*dimension/4, dimension/2);
 		Point current = pipers[id];
 		System.out.println("PRINTING MAGNET LOCATION....." + magnetLocation.x +  "," + magnetLocation.y);
-		if(current.x < gateLocation.x){
+		if(current.x < gateLocation.x && reachedmagnet == false){
 			this.music = false;
 			double dist = distance(current, gateLocation);
 			double ox = (gateLocation.x - current.x) / dist * pspeed;
@@ -92,76 +92,63 @@ public class Player extends piedpipers.sim.Player {
 		}
 		else
 		{
-			if (current.x < magnetLocation.x && reachedmagnet == false)
-			{
-				this.music = false;
-				double dist = distance(current, magnetLocation);
-				double ox = (magnetLocation.x - current.x) / dist * pspeed;
-				double oy = (magnetLocation.y - current.y) / dist * pspeed;
-				current.x += ox;
-				current.y += oy;
-				return current;
+			reachedmagnet = true; 
+			if(this.id == magnet) {
+				this.music = true;
+				if (noRatsOutsideRadius(rats)) {
+					System.out.println("NO RATS OUTSIDE RADIUS");
+					//all rats collected at magnet, magnet back to other side
+					Point target = new Point(0, gateLocation.y);
+					System.out.println("target = " + target.x + " " + target.y);
+					double dist = distance(current, target);
+					double ox = mpspeed * (target.x - current.x) / dist;
+					double oy = mpspeed * (target.y - current.y) / dist ;
+					current.x += ox;
+					current.y += oy;
+					return current;
+				}
+				else {
+					return current;
+				}
+					
 			}
 			else
-			{
-				reachedmagnet = true; 
-				if(this.id == magnet) {
-					this.music = true;
-					if (noRatsOutsideRadius(rats)) {
-						System.out.println("NO RATS OUTSIDE RADIUS");
-						//all rats collected at magnet, magnet back to other side
-						Point target = new Point(0, gateLocation.y);
-						System.out.println("target = " + target.x + " " + target.y);
-						double dist = distance(current, target);
-						double ox = mpspeed * (target.x - current.x) / dist;
-						double oy = mpspeed * (target.y - current.y) / dist ;
-						current.x += ox;
-						current.y += oy;
-						return current;
-					}
-					else {
-						return current;
-					}
+			{	
 					
-				}
-				else
-				{	
-					
-					while (true) {
-						if (!comeback) {
-							if (!closetoWall(current)) {
-								this.music = false;
-								current.x += pspeed * Math.sin(angle[this.id] * Math.PI / 180);
-								current.y += pspeed * Math.cos(angle[this.id] * Math.PI / 180);
-								
-								return current;
-							}
-							else {
-								this.music = true;
-								comeback = true;
-							}
+				while (true) {
+					if (!comeback) {
+						if (!closetoWall(current)) {
+							this.music = false;
+							current.x += pspeed * Math.sin(angle[this.id] * Math.PI / 180);
+							current.y += pspeed * Math.cos(angle[this.id] * Math.PI / 180);
+							
+							return current;
 						}
 						else {
-							if (!closetoMagnet(current)) {
-								this.music = true;
-								double dist = distance(current, magnetLocation);
-								double ox = mpspeed * (magnetLocation.x - current.x) / dist;
-								double oy = mpspeed * (magnetLocation.y - current.y) / dist ;
-								//System.out.println("move toward the left side");
-								current.x += ox;
-								current.y += oy;
-								return current;
-							}
-							else {
-								this.music = false;
-								comeback = false;
-							}
-
+							this.music = true;
+							comeback = true;
 						}
 					}
-					
+					else {
+						if (!closetoMagnet(current)) {
+							this.music = true;
+							double dist = distance(current, magnetLocation);
+							double ox = mpspeed * (magnetLocation.x - current.x) / dist;
+							double oy = mpspeed * (magnetLocation.y - current.y) / dist ;
+							//System.out.println("move toward the left side");
+							current.x += ox;								
+							current.y += oy;
+							return current;
+						}
+						else {
+							this.music = false;
+							comeback = false;
+						}
+					}
 				}
+				
 			}
+		
 		}
 						
 	}

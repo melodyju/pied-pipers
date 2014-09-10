@@ -34,6 +34,19 @@ public class Player extends piedpipers.sim.Player {
 		}*/
 	}
 
+	boolean closetoWall (Point current) {
+		boolean wall = false;
+		if (Math.abs(current.x-dimension)<pspeed) {
+			wall = true;
+		}
+		if (Math.abs(current.y-dimension)<pspeed) {
+			wall = true;
+		}
+		if (Math.abs(current.y)<pspeed) {
+			wall = true;
+		}
+		return wall;
+	}
 	public Point move(Point[] pipers, Point[] rats) {
 		npipers = pipers.length;
 		
@@ -79,17 +92,32 @@ public class Player extends piedpipers.sim.Player {
 					return current;
 				}
 				else
-				{		
-					if(angle[this.id] <= 180)
+				{	
+					if (!closetoWall(current))
 					{
-						current.x += pspeed * Math.sin(angle[this.id] * Math.PI / 180);
-						current.y += pspeed * Math.cos(angle[this.id] * Math.PI / 180);
+						if(angle[this.id] <= 180)
+						{
+							current.x += pspeed * Math.sin(angle[this.id] * Math.PI / 180);
+							current.y += pspeed * Math.cos(angle[this.id] * Math.PI / 180);
+						}
+						else
+						{
+							current.x -= pspeed * Math.sin(angle[this.id] * Math.PI / 180);
+							current.y -= pspeed * Math.cos(angle[this.id] * Math.PI / 180);
+						}
 					}
 					else
 					{
-						current.x -= pspeed * Math.sin(angle[this.id] * Math.PI / 180);
-						current.y -= pspeed * Math.cos(angle[this.id] * Math.PI / 180);
+						this.music = true;
+						double dist = distance(current, magnetLocation);
+						assert dist > 0;
+						double ox = mpspeed * (magnetLocation.x - current.x) / dist;
+						double oy = mpspeed * (magnetLocation.y - current.y) / dist ;
+						//System.out.println("move toward the left side");
+						current.x += ox;
+						current.y += oy;
 					}
+
 					return current;
 				}
 			}

@@ -93,6 +93,37 @@ public class Player extends piedpipers.sim.Player {
 				}
 				else
 				{	
+					if (!comeback) {
+						if (!closetoWall(current)) {
+							if (angle[this.id] <= 180) {
+								current.x += pspeed * Math.sin(angle[this.id] * Math.PI / 180);
+								current.y += pspeed * Math.cos(angle[this.id] * Math.PI / 180);
+							}
+							else {
+								current.x -= pspeed * Math.sin(angle[this.id] * Math.PI / 180);
+								current.y -= pspeed * Math.cos(angle[this.id] * Math.PI / 180);
+							}
+							return current;
+						}
+						//closetoWall(current) == true
+						this.comeback = true;
+					}
+					
+					if (comeback) {
+						//TODO: check if close to magnet, and then turn off comeback.
+						//this code is executing when comeback is true
+						this.music = true;
+						double dist = distance(current, magnetLocation);
+						double ox = mpspeed * (magnetLocation.x - current.x) / dist;
+						double oy = mpspeed * (magnetLocation.y - current.y) / dist ;
+						//System.out.println("move toward the left side");
+						current.x += ox;
+						current.y += oy;
+						return current;
+					}
+					
+					
+					/*
 					if (!closetoWall(current))
 					{
 						if(angle[this.id] <= 180)
@@ -119,6 +150,7 @@ public class Player extends piedpipers.sim.Player {
 					}
 
 					return current;
+					*/
 				}
 			}
 		}

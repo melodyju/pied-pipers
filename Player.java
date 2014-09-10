@@ -12,7 +12,7 @@ public class Player extends piedpipers.sim.Player {
 
 	static int magnet = 0;
 	static double[] angle;
-	private boolean comeback;
+	private boolean comeback = false;
 	public Point gateLocation;
 	public Point magnetLocation;
 
@@ -36,31 +36,20 @@ public class Player extends piedpipers.sim.Player {
 
 	public Point move(Point[] pipers, Point[] rats) {
 		npipers = pipers.length;
-		System.out.println(npipers);
+		
+		//Assign raial angles to the pipers
 		double fraction = 360/npipers;
 		angle = new double[npipers];
-		for(int i=0 ; i< npipers; i++)
+		for(int i=1 ; i< npipers; i++)
 		{
-			System.out.println("In the loop..!!");
 			angle[i] = fraction*i;
-			System.out.println(angle[i]);
+			System.out.println("PRINTING anfle ..." +  angle[i]);
 		}
-		System.out.println("Done..!!");
+		
 		gateLocation = new Point(dimension/2, dimension/2); //assume there is only one magnet
 		magnetLocation = new Point(3*dimension/4, dimension/2);
 		Point current = pipers[id];
 		System.out.println("PRINTING MAGNET LOCATION....." + magnetLocation.x +  "," + magnetLocation.y);
-		
-		if(current.x < magnetLocation.x){
-			this.music = false;
-			double dist = distance(current, magnetLocation);
-			double ox = (magnetLocation.x - current.x) / dist * pspeed;
-			double oy = (magnetLocation.y - current.y) / dist * pspeed;
-			current.x += ox;
-			current.y += oy;
-			return current;
-		}
-		/*
 		if(current.x < gateLocation.x){
 			this.music = false;
 			double dist = distance(current, gateLocation);
@@ -70,10 +59,10 @@ public class Player extends piedpipers.sim.Player {
 			current.y += oy;
 			return current;
 		}
-		*/
-		if (this.id == magnet) {
+		else
+		{
 			if (current.x < magnetLocation.x)
-				{
+			{
 				this.music = false;
 				double dist = distance(current, magnetLocation);
 				double ox = (magnetLocation.x - current.x) / dist * pspeed;
@@ -82,30 +71,30 @@ public class Player extends piedpipers.sim.Player {
 				current.y += oy;
 				return current;
 			}
-			else {
-				this.music = true;
-				return current;
+			else
+			{
+				if(this.id == magnet)
+				{
+					this.music = true;
+					return current;
+				}
+				else
+				{		
+					if(angle[this.id] <= 180)
+					{
+						current.x += pspeed * Math.sin(angle[this.id] * Math.PI / 180);
+						current.y += pspeed * Math.cos(angle[this.id] * Math.PI / 180);
+					}
+					else
+					{
+						current.x -= pspeed * Math.sin(angle[this.id] * Math.PI / 180);
+						current.y -= pspeed * Math.cos(angle[this.id] * Math.PI / 180);
+					}
+					return current;
+				}
 			}
 		}
-
-		else {
-			if (comeback){
-				this.music = true;
-				if (true) { //close enuf to magnet to drop off all rats
-					comeback = false;
-				}
-				return current;
-			}
-			else {
-				this.music = false;
-				current.x += pspeed * Math.sin(angle[id] * Math.PI / 180);
-				current.y += pspeed * Math.cos(angle[id] * Math.PI / 180);
-				if (false) { //implement condition later
-					comeback = true;
-				}
-				return current; //change later
-			}
-		}
+						
 	}
 
 }

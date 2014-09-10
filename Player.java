@@ -70,6 +70,7 @@ public class Player extends piedpipers.sim.Player {
 		return true;
 	}
 
+	
 	public Point move(Point[] pipers, Point[] rats) {
 		npipers = pipers.length;
 		
@@ -116,7 +117,6 @@ public class Player extends piedpipers.sim.Player {
 				this.music = true;
 				if (noRatsOutsideRadius(rats, current)) {
 					System.out.println("NO RATS OUTSIDE RADIUS");
-					norats = 1;
 					//all rats collected at magnet, magnet back to other side
 					Point target = new Point(0, gateLocation.y);
 					System.out.println("target = " + target.x + " " + target.y);
@@ -134,8 +134,7 @@ public class Player extends piedpipers.sim.Player {
 			}
 			else
 			{	
-				System.out.println("FLAG VALUE..." + norats);
-				if(norats == 1)
+				if (noRatsOutsideRadius(rats, magnetLocation))
 				{
 					System.out.println("NOOOO RAATS");
 					this.music = false;

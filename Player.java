@@ -13,6 +13,7 @@ public class Player extends piedpipers.sim.Player {
 	static int magnet = 0;
 	static double[] angle;
 	private boolean comeback = false;
+	private boolean reachedmagnet = false;
 	public Point gateLocation;
 	public Point magnetLocation;
 
@@ -49,7 +50,7 @@ public class Player extends piedpipers.sim.Player {
 	}
 
 	boolean closetoMagnet(Point current) {
-		if (Math.abs(distance(current, magnetLocation)) < 10) {
+		if (Math.abs(distance(current, magnetLocation)) < 8) {
 			return true;
 		}
 		return false;
@@ -82,7 +83,7 @@ public class Player extends piedpipers.sim.Player {
 		}
 		else
 		{
-			if (current.x < magnetLocation.x)
+			if (current.x < magnetLocation.x && reachedmagnet == false)
 			{
 				this.music = false;
 				double dist = distance(current, magnetLocation);
@@ -94,6 +95,7 @@ public class Player extends piedpipers.sim.Player {
 			}
 			else
 			{
+				reachedmagnet = true; 
 				if(this.id == magnet)
 				{
 					this.music = true;
@@ -105,7 +107,9 @@ public class Player extends piedpipers.sim.Player {
 						if (!comeback) {
 							if (!closetoWall(current)) {
 								this.music = false;
-								if (angle[this.id] <= 180) {
+								current.x += pspeed * Math.sin(angle[this.id] * Math.PI / 180);
+								current.y += pspeed * Math.cos(angle[this.id] * Math.PI / 180);
+								/*if (angle[this.id] <= 180) {
 									current.x += pspeed * Math.sin(angle[this.id] * Math.PI / 180);
 									current.y += pspeed * Math.cos(angle[this.id] * Math.PI / 180);
 								}
@@ -113,6 +117,7 @@ public class Player extends piedpipers.sim.Player {
 									current.x -= pspeed * Math.sin(angle[this.id] * Math.PI / 180);
 									current.y -= pspeed * Math.cos(angle[this.id] * Math.PI / 180);
 								}
+								*/
 								return current;
 							}
 							else {
@@ -139,7 +144,6 @@ public class Player extends piedpipers.sim.Player {
 						}
 					}
 					
-					return current;
 				}
 			}
 		}

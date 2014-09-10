@@ -56,6 +56,15 @@ public class Player extends piedpipers.sim.Player {
 		return false;
 	}
 
+	boolean noRatsOutsideRadius(Point[] rats) {
+		for (int i = 0; i < rats.length; i++) {
+			if (closetoMagnet(rats[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public Point move(Point[] pipers, Point[] rats) {
 		npipers = pipers.length;
 		
@@ -96,10 +105,22 @@ public class Player extends piedpipers.sim.Player {
 			else
 			{
 				reachedmagnet = true; 
-				if(this.id == magnet)
-				{
+				if(this.id == magnet) {
 					this.music = true;
-					return current;
+					if (noRatsOutsideRadius) {
+						//all rats collected at magnet, magnet back to other side
+						Point target = new Point(0, gateLocation.y);
+						double dist = distance(current, target);
+						double ox = mpspeed * (target.x - current.x) / dist;
+						double oy = mpspeed * (target.y - current.y) / dist ;
+						current.x += ox;
+						current.y += oy;
+						return current;
+					}
+					else {
+						return current;
+					}
+					
 				}
 				else
 				{	

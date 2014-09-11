@@ -14,6 +14,7 @@ public class Player extends piedpipers.sim.Player {
 	static int magnet = 0;
 	static double[] angle;
 	private boolean comeback = false;
+	private boolean off = false;
 	private boolean reachedmagnet = false;
 
 	public Point gateLocation;
@@ -134,46 +135,55 @@ public class Player extends piedpipers.sim.Player {
 			}
 			else
 			{	
-				if (noRatsOutsideRadius(rats, magnetLocation))
+				if (off)
 				{
-					System.out.println("NOOOO RAATS");
 					this.music = false;
 					return current;
 				}
 				else 
 				{
-					while (true) {
-						if (!comeback) {
-							if (!closetoWall(current)) {
-								this.music = false;
-								current.x += pspeed * Math.sin(angle[this.id] * Math.PI / 180);
-								current.y += pspeed * Math.cos(angle[this.id] * Math.PI / 180);
-								
-								return current;
+					if (noRatsOutsideRadius(rats, magnetLocation))
+					{
+						System.out.println("NOOOO RAATS");
+						off = true;
+						this.music = false;
+						return current;
+					}
+					else 
+					{
+						while (true) {
+							if (!comeback) {
+								if (!closetoWall(current)) {
+									this.music = false;
+									current.x += pspeed * Math.sin(angle[this.id] * Math.PI / 180);
+									current.y += pspeed * Math.cos(angle[this.id] * Math.PI / 180);
+									
+									return current;
+								}
+								else {
+									this.music = true;
+									comeback = true;
+								}
 							}
 							else {
-								this.music = true;
-								comeback = true;
-							}
-						}
-						else {
-							if (!closetoMagnet(current)) {
-								this.music = true;
-								double dist = distance(current, magnetLocation);
-								double ox = mpspeed * (magnetLocation.x - current.x) / dist;
-								double oy = mpspeed * (magnetLocation.y - current.y) / dist ;
-								//System.out.println("move toward the left side");
-								current.x += ox;								
-								current.y += oy;
-								return current;
-							}
-							else {
-								this.music = false;
-								comeback = false;
+								if (!closetoMagnet(current)) {
+									this.music = true;
+									double dist = distance(current, magnetLocation);
+									double ox = mpspeed * (magnetLocation.x - current.x) / dist;
+									double oy = mpspeed * (magnetLocation.y - current.y) / dist ;
+									//System.out.println("move toward the left side");
+									current.x += ox;								
+									current.y += oy;
+									return current;
+								}
+								else {
+									this.music = false;
+									comeback = false;
+								}
 							}
 						}
 					}
-				}
+			}
 				
 			}
 		

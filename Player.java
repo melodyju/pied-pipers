@@ -1,4 +1,4 @@
-package piedpipers.group4;
+package piedpipers.exp2;
 
 import java.util.*;
 
@@ -9,16 +9,13 @@ public class Player extends piedpipers.sim.Player {
 
 	static double pspeed = 0.49;
 	static double mpspeed = 0.09;
-	static int norats;
 
-	static int magnet = 0;
-	static double[] angle;
-	private boolean comeback = false;
-	private boolean off = false;
-	private boolean reachedmagnet = false;
+	private double myPartition;
+	private int step; //for circle
 
-	public Point gateLocation;
-	public Point magnetLocation;
+	private Point target; //for worker only
+
+	public double slice;
 
 	public Player() {
 		super();
@@ -29,166 +26,176 @@ public class Player extends piedpipers.sim.Player {
 	}
 
 	public void init() {
-		int[] thetas = new int[npipers];
-		/*for (int i=0; i< npipers; i++) {
-			Random random = new Random();
-			int theta = random.nextInt(180);
-			thetas[i]=theta;
-			System.out.println(thetas[i]);
-		}*/
+		
 	}
 
-	boolean closetoWall (Point current) {
-		boolean wall = false;
-		if (Math.abs(current.x-dimension)<pspeed ) {
-			wall = true;
+	public double[] createPartitions(int npipers) {
+		double[] partitions = new double[npipers];
+		slice = 180.0/npipers;
+		for (int i = 0; i < npipers; i++) {
+			partitions[i] = slice * (i + 1);
+			//System.out.println(partitions[i]);
 		}
-		if (Math.abs(current.y-dimension)<pspeed) {
-			wall = true;
-		}
-		if (Math.abs(current.x-dimension/2)<pspeed ) {
-			wall = true;
-		}
-		if (Math.abs(current.y)<pspeed) {
-			wall = true;
-		}
-		return wall;
+		return partitions;
 	}
 
-	boolean closetoMagnet(Point current) {
-		if (Math.abs(distance(current, magnetLocation)) < 5) {
-			return true;
-		}
-		return false;
+	public Point findCenter(double[] partitions, int index) {
+		double r = dimension/3;
+		double theta = (partitions[index] + (partitions[index] - slice)) / 2;
+		System.out.println("THETA = " + theta);
+		double cosineTheta = Math.sin(Math.toRadians(theta));
+		double sineTheta = Math.cos(Math.toRadians(theta));
+		//x = r cos theta
+		//y = r sin theta
+		double x = r * cosineTheta + (dimension/2);
+		double y = (dimension/2) - r * sineTheta;
+		return new Point(x, y);
 	}
 
-	boolean noRatsOutsideRadius(Point[] rats, Point current) {
-		for (int i = 0; i < rats.length; i++) {
-			if (Math.abs(distance(current, rats[i])) > 9  && rats[i].x > gateLocation.x) {
-				return false;
+	public Point[] findRatsInPartition(Point[] allRats, double[] partitions, int index) {
+		 
+		 ArrayList<Point> ratsInPartition = new ArrayList<Point>();
+
+		 Point gate = new Point(dimension/2, dimension/2);
+		 double hypotenuse;
+		 double cosineTheta;
+		 double theta;
+
+		 for (int i = 0; i < allRats.length; i++) {
+		 	hypotenuse = distance(allRats[i], gate);
+		 	//System.out.println(hypotenuse);
+		 	cosineTheta = (dimension/2 - allRats[i].y) / hypotenuse;
+		 	//System.out.println(cosineTheta);
+		 	//System.out.println(Math.acos(cosineTheta));
+		 	theta = Math.toDegrees(Math.acos(cosineTheta));
+		 	//System.out.println(theta);
+
+		 	if (theta > partitions[index] - slice && theta <= partitions[index]) {
+		 		ratsInPartition.add(allRats[i]);
+		 	}
+		 }
+
+		 Point[] ratArray = new Point[ratsInPartition.size()];
+		 int i = 0;
+		 for (Point rat : ratsInPartition) {
+		 	ratArray[i] = rat;
+		 	i++;
+		 }
+		 return ratArray;
+	}
+
+	public Point findNewTarget(Point[] myRats, Point partnerLocation) {
+		//METHOD 1
+		//find "average dense area." average doesn't include the rats that are already at the partner/magnet.
+		Point rat;
+		double xtotal = 0;
+		double ytotal = 0;
+		int count = 0;
+		for (int i = 0; i < myRats.length; i++) {
+			rat = myRats[i];
+			if (distance(rat, partnerLocation) > 10) {
+				xtotal += rat.x;
+				ytotal += rat.y;
+				count++;
 			}
 		}
-		return true;
+		return new Point(xtotal/count, ytotal/count);
+		//end
 	}
 
-	
 	public Point move(Point[] pipers, Point[] rats) {
 		npipers = pipers.length;
 		
-		//Assign raial angles to the pipers
-		double fraction = 360/npipers;
-		angle = new double[npipers];
-		for(int i=1 ; i< npipers; i++)
-		{
-			angle[i] = fraction*i;
-			System.out.println("PRINTING anfle ..." +  angle[i]);
-		}
-		
-		gateLocation = new Point(dimension/2, dimension/2); //assume there is only one magnet
-		magnetLocation = new Point(3*dimension/4, dimension/2);
-		
-		
 		Point current = pipers[id];
-		System.out.println("PRINTING MAGNET LOCATION....." + magnetLocation.x +  "," + magnetLocation.y);
-		if(current.x < magnetLocation.x && reachedmagnet == false){
+		Point gate = new Point(dimension/2, dimension/2);
+		
+		//if on left side of fence, move toward gate
+		if (current.x < gate.x) {
 			this.music = false;
-			
-			if (current.x < gateLocation.x) {
-				double dist = distance(current, gateLocation);
-				double ox = (gateLocation.x - current.x) / dist * pspeed;
-				double oy = (gateLocation.y - current.y) / dist * pspeed;
-				current.x += ox;
-				current.y += oy;
-				return current;
-			}
-			else {
-				double dist = distance(current, magnetLocation);
-				double ox = (magnetLocation.x - current.x) / dist * pspeed;
-				double oy = (magnetLocation.y - current.y) / dist * pspeed;
-				current.x += ox;
-				current.y += oy;
-				return current;
-			}
-			
+			double dist = distance(current, gate);
+			double ox = (gate.x - current.x) / dist * pspeed;
+			double oy = (gate.y - current.y) / dist * pspeed;
+			current.x += ox;
+			current.y += oy;
+			return current;
 		}
-		else
-		{
-			reachedmagnet = true; 
-			if(this.id == magnet) {
+	
+		double[] partitions = createPartitions(npipers / 2);
+		myPartition = partitions[id / 2];
+
+		if (id % 2 == 0) { //0, 2, 4, 6
+			//magnet
+			Point axis = findCenter(partitions, id/2);
+			//System.out.println(id + ", " + id/2 + ", " + axis.x + ", " + axis.y);
+
+			if (current.x < axis.x) {
+				this.music = false;
+				double dist = distance(current, axis);
+				double ox = (axis.x - current.x) / dist * pspeed;
+				double oy = (axis.y - current.y) / dist * pspeed;
+				current.x += ox;
+				current.y += oy;
+				return current;
+			}
+
+			else {
 				this.music = true;
-				if (noRatsOutsideRadius(rats, current)) {
-					System.out.println("NO RATS OUTSIDE RADIUS");
-					//all rats collected at magnet, magnet back to other side
-					Point target = new Point(0, gateLocation.y);
-					System.out.println("target = " + target.x + " " + target.y);
+				return current;
+			}
+
+			/*
+			double slice = 2 * Math.PI / (200 * Math.PI);
+			double angle = slice * step;
+			double newX = axis.x + 10 * (Math.cos(angle));
+			double newY = axis.y + 10 * (Math.sin(angle));
+			step++;
+			if (step >= (200 * Math.PI)) {
+				step = 0;
+			}
+			return new Point(newX, newY);
+			*/
+		}
+		else { //1, 3, 5, 7
+			//worker
+			Point partnerLocation = pipers[id - 1];
+
+			if (!this.music) { //in mode to find rats.
+				if (this.target == null) {
+					Point[] myRats = findRatsInPartition(rats, partitions, id/2);
+					target = findNewTarget(myRats, partnerLocation);
+				}
+				System.out.println(target.x + " " + target.y);
+				if ((int)current.x == (int)target.x && (int)current.y == (int)target.y) {
+					this.music = true;
+					return current;
+				}
+				else {
 					double dist = distance(current, target);
-					double ox = mpspeed * (target.x - current.x) / dist;
-					double oy = mpspeed * (target.y - current.y) / dist ;
+					double ox = (target.x - current.x) / dist * pspeed;
+					double oy = (target.y - current.y) / dist * pspeed;
 					current.x += ox;
 					current.y += oy;
 					return current;
 				}
-				else {
-					return current;
-				}
-					
 			}
-			else
-			{	
-				if (off)
-				{
+
+			else { //in mode to go back to partner.
+				if ((int)current.x == (int)partnerLocation.x && (int)current.y == (int)partnerLocation.y) {
 					this.music = false;
+					this.target = null;
 					return current;
 				}
-				else 
-				{
-					if (noRatsOutsideRadius(rats, magnetLocation))
-					{
-						System.out.println("NOOOO RAATS");
-						off = true;
-						this.music = false;
-						return current;
-					}
-					else 
-					{
-						while (true) {
-							if (!comeback) {
-								if (!closetoWall(current)) {
-									this.music = false;
-									current.x += pspeed * Math.sin(angle[this.id] * Math.PI / 180);
-									current.y += pspeed * Math.cos(angle[this.id] * Math.PI / 180);
-									
-									return current;
-								}
-								else {
-									this.music = true;
-									comeback = true;
-								}
-							}
-							else {
-								if (!closetoMagnet(current)) {
-									this.music = true;
-									double dist = distance(current, magnetLocation);
-									double ox = mpspeed * (magnetLocation.x - current.x) / dist;
-									double oy = mpspeed * (magnetLocation.y - current.y) / dist ;
-									//System.out.println("move toward the left side");
-									current.x += ox;								
-									current.y += oy;
-									return current;
-								}
-								else {
-									this.music = false;
-									comeback = false;
-								}
-							}
-						}
-					}
+				else {
+					double dist = distance(current, partnerLocation);
+					double ox = (partnerLocation.x - current.x) / dist * mpspeed;
+					double oy = (partnerLocation.y - current.y) / dist * mpspeed;
+					current.x += ox;
+					current.y += oy;
+					return current;
+				}
 			}
-				
-			}
-		
+
 		}
-						
 	}
 
 }

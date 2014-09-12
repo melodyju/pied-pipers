@@ -1,4 +1,4 @@
-package piedpipers.exp2;
+package piedpipers.group4;
 
 import java.util.*;
 
@@ -62,16 +62,18 @@ public class Player extends piedpipers.sim.Player {
 		 double theta;
 
 		 for (int i = 0; i < allRats.length; i++) {
-		 	hypotenuse = distance(allRats[i], gate);
-		 	//System.out.println(hypotenuse);
-		 	cosineTheta = (dimension/2 - allRats[i].y) / hypotenuse;
-		 	//System.out.println(cosineTheta);
-		 	//System.out.println(Math.acos(cosineTheta));
-		 	theta = Math.toDegrees(Math.acos(cosineTheta));
-		 	//System.out.println(theta);
+		 	if (allRats[i].x > dimension/2) {
+		 		hypotenuse = distance(allRats[i], gate);
+			 	//System.out.println(hypotenuse);
+			 	cosineTheta = (dimension/2 - allRats[i].y) / hypotenuse;
+			 	//System.out.println(cosineTheta);
+			 	//System.out.println(Math.acos(cosineTheta));
+			 	theta = Math.toDegrees(Math.acos(cosineTheta));
+			 	//System.out.println(theta);
 
-		 	if (theta > partitions[index] - slice && theta <= partitions[index]) {
-		 		ratsInPartition.add(allRats[i]);
+			 	if (theta > partitions[index] - slice && theta <= partitions[index]) {
+			 		ratsInPartition.add(allRats[i]);
+			 	}
 		 	}
 		 }
 
@@ -85,6 +87,7 @@ public class Player extends piedpipers.sim.Player {
 	}
 
 	public Point findNewTarget(Point[] myRats, Point partnerLocation) {
+		/*
 		//METHOD 1
 		//find "average dense area." average doesn't include the rats that are already at the partner/magnet.
 		Point rat;
@@ -101,6 +104,21 @@ public class Player extends piedpipers.sim.Player {
 		}
 		return new Point(xtotal/count, ytotal/count);
 		//end
+		*/
+
+		Point rat;
+		double currentMaxDistance = 0;
+		Point currentMaxDistanceRat = partnerLocation;
+
+		for (int i = 0; i < myRats.length; i++) {
+			rat = myRats[i];
+			if (distance(rat, partnerLocation) > currentMaxDistance) {
+				currentMaxDistance = distance(rat, partnerLocation);
+				currentMaxDistanceRat = rat;
+			}
+		}
+
+		return currentMaxDistanceRat;
 	}
 
 	public Point move(Point[] pipers, Point[] rats) {

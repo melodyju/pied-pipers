@@ -241,7 +241,7 @@ public class Player extends piedpipers.sim.Player {
 			//this part takes care of figuring out if the game's over (all rats captured, move toward other side) or not
 			if (allRatsCaptured) { //move to gate
 				this.music = true;
-				Point goal = new Point(0, dimension/2);
+				Point goal = new Point(dimension/2, dimension/2);
 				double dist = distance(current, goal);
 				double ox = (goal.x - current.x) / dist * pspeed;
 				double oy = (goal.y - current.y) / dist * pspeed;
